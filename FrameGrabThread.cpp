@@ -20,7 +20,9 @@ namespace
 
 FrameGrabThread::FrameGrabThread(CameraContext cameraContext)
   : m_camCtx(cameraContext),
-    m_keepGrabbing(true)
+    m_keepGrabbing(true),
+    m_timerJpegDecode("Jpeg decode"),
+    m_timerYuvRgb("Yuv to rgb conversion")
 {
 }
 
@@ -33,6 +35,7 @@ void FrameGrabThread::run()
     std::cout << "Got frame." << std::endl;
     const int itype = Y4M_ILACE_NONE;
     const int ctypeIgnored = 0;
+    m_timerJpegDecode.start();
     const int retDecode = decode_jpeg_raw(s_frameDataBuffer,
                                           size,
                                           itype,
@@ -42,7 +45,12 @@ void FrameGrabThread::run()
                                           s_rawY,
                                           s_rawU,
                                           s_rawV); // 420 format.
+    m_timerJpegDecode.stop();
+
+    m_timerYuvRgb.start();
     convertYuv420ToRgb888(s_rawY, s_rawU, s_rawV, FRAME_WIDTH, FRAME_HEIGHT, s_rgbBuffer);
+    m_timerYuvRgb.stop();
+
     QImage image(s_rgbBuffer, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB888);
     std::cout << "Decoded frame." << std::endl;
     emit signalNewFrame(image);

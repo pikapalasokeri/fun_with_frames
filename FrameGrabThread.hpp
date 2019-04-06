@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QImage>
 #include "Video.hpp"
+#include "Timer.hpp"
 
 class FrameGrabThread : public QThread
 {
@@ -17,6 +18,8 @@ public:
 private:
   CameraContext m_camCtx;
   bool m_keepGrabbing;
+  Timer m_timerJpegDecode;
+  Timer m_timerYuvRgb;
 };
 
 #endif

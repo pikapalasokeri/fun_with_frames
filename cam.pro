@@ -10,5 +10,5 @@ LIBS += -lv4l2 -llavjpeg
 CONFIG += debug c++11
 
 # Input
-SOURCES += cam2.cpp ImageViewer.cpp Video.cpp FrameGrabThread.cpp ImageProcessing.cpp
+SOURCES += cam2.cpp ImageViewer.cpp Video.cpp FrameGrabThread.cpp ImageProcessing.cpp Timer.cpp
 HEADERS += ImageViewer.hpp FrameGrabThread.hpp
