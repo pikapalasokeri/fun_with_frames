@@ -20,6 +20,7 @@ private:
   bool m_keepGrabbing;
   Timer m_timerJpegDecode;
   Timer m_timerYuvRgb;
+  Timer m_timerMovement;
 };
 
 #endif

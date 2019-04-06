@@ -1,7 +1,13 @@
 #include "ImageProcessing.hpp"
+#include "FrameSize.hpp"
+#include <algorithm>
 
 namespace
 {
+  float s_movementBackgroundBuffer[FRAME_SIZE];
+  unsigned char s_movementBuffer[FRAME_SIZE];
+  bool s_movementInitialized = false;
+
   int saturatePixel(const int v)
   {
     const int tooSmall = v >> 31; // Fill with sign bit
@@ -20,6 +26,41 @@ namespace
     outRgb[0] = static_cast<unsigned char>(saturatePixel(y + prer));
     outRgb[1] = static_cast<unsigned char>(saturatePixel(y + preg));
     outRgb[2] = static_cast<unsigned char>(saturatePixel(y + preb));
+  }
+}
+
+void movementAddFrame(unsigned char* frameGray)
+{
+  if (!s_movementInitialized)
+  {
+    s_movementInitialized = true;
+    for (int i = 0; i < FRAME_SIZE; ++i)
+    {
+      s_movementBackgroundBuffer[i] = 0.0F;
+    }
+  }
+
+  const float ratio = 0.05F;
+  const float oneMinusRatio = 1.0F - ratio;
+  const unsigned char threshold = 14U;
+  for (int i = 0; i < FRAME_SIZE; ++i)
+  {
+    s_movementBackgroundBuffer[i] = s_movementBackgroundBuffer[i] * oneMinusRatio + frameGray[i] * ratio;
+    s_movementBuffer[i] = std::abs(static_cast<unsigned char>(s_movementBackgroundBuffer[i])
+                                   - frameGray[i]) > threshold;
+  }
+}
+
+void movementVisualizeMask(unsigned char* outRgbBuffer)
+{
+  for (int i = 0; i < FRAME_SIZE; ++i)
+  {
+    if (s_movementBuffer[i] == 0)
+    {
+      outRgbBuffer[3*i] = 0;
+      outRgbBuffer[3*i + 1] = 0;
+      outRgbBuffer[3*i + 2] = 0;
+    }
   }
 }
 

@@ -8,4 +8,7 @@ void convertYuv420ToRgb888(const unsigned char* rawY,
                            const int height,
                            unsigned char* outRgbBuffer);
 
+void movementAddFrame(unsigned char* frameGray);
+void movementVisualizeMask(unsigned char* outRgbBuffer);
+
 #endif

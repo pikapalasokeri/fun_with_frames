@@ -1,6 +1,7 @@
 #include "FrameGrabThread.hpp"
 #include "Video.hpp"
 #include "ImageProcessing.hpp"
+#include "FrameSize.hpp"
 extern "C"
 {
 #include <mjpegtools/jpegutils.h>
@@ -22,7 +23,8 @@ FrameGrabThread::FrameGrabThread(CameraContext cameraContext)
   : m_camCtx(cameraContext),
     m_keepGrabbing(true),
     m_timerJpegDecode("Jpeg decode"),
-    m_timerYuvRgb("Yuv to rgb conversion")
+    m_timerYuvRgb("Yuv to rgb conversion"),
+    m_timerMovement("Movement")
 {
 }
 
@@ -50,6 +52,11 @@ void FrameGrabThread::run()
     m_timerYuvRgb.start();
     convertYuv420ToRgb888(s_rawY, s_rawU, s_rawV, FRAME_WIDTH, FRAME_HEIGHT, s_rgbBuffer);
     m_timerYuvRgb.stop();
+
+    m_timerMovement.start();
+    movementAddFrame(s_rawY);
+    movementVisualizeMask(s_rgbBuffer);
+    m_timerMovement.stop();
 
     QImage image(s_rgbBuffer, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB888);
     std::cout << "Decoded frame." << std::endl;
