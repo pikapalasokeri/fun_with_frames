@@ -2,23 +2,24 @@
 
 namespace
 {
-  template<typename T>
-  const T& clamp(const T& v, const T& low, const T& high)
+  int saturatePixel(const int v)
   {
-    return (v > high ? high : (v < low ? low : v));
+    const int tooSmall = v >> 31; // Fill with sign bit
+    const int tooLarge = ~((v > 255) - 1); // take advantage of two's complement
+    const int keepValue = ~(tooSmall ^ tooLarge);
+    const int ret = (tooLarge & 0x000000FF) | (keepValue & v);
+    return ret;
   }
 
   void yuvToRgb(const unsigned char y,
-                const unsigned char u,
-                const unsigned char v,
+                const int prer,
+                const int preg,
+                const int preb,
                 unsigned char* outRgb)
   {
-    const int cy = y;
-    const int cb = u - 128;
-    const int cr = v - 128;
-    outRgb[0] = static_cast<unsigned char>(clamp(cy + cr + (cr >> 2) + (cr >> 3) + (cr >> 5), 0, 255));
-    outRgb[1] = static_cast<unsigned char>(clamp(cy - ((cb >> 2) + (cb >> 4) + (cb >> 5)) - ((cr >> 1) + (cr >> 3) + (cr >> 4) + (cr >> 5)), 0, 255));
-    outRgb[2] = static_cast<unsigned char>(clamp(cy + cb + (cb >> 1) + (cb >> 2) + (cb >> 6), 0, 255));
+    outRgb[0] = static_cast<unsigned char>(saturatePixel(y + prer));
+    outRgb[1] = static_cast<unsigned char>(saturatePixel(y + preg));
+    outRgb[2] = static_cast<unsigned char>(saturatePixel(y + preb));
   }
 }
 
@@ -44,12 +45,16 @@ void convertYuv420ToRgb888(const unsigned char* rawY,
       const unsigned char y2 = rawY[yIx1 + 1];
       const unsigned char y3 = rawY[yIx2];
       const unsigned char y4 = rawY[yIx2 + 1];
-      const unsigned char u = rawU[uIx];
-      const unsigned char v = rawV[vIx];
-      yuvToRgb(y1, u, v, &outRgbBuffer[3*(rgbIx1)]);
-      yuvToRgb(y2, u, v, &outRgbBuffer[3*(rgbIx1 + 1)]);
-      yuvToRgb(y3, u, v, &outRgbBuffer[3*(rgbIx2)]);
-      yuvToRgb(y4, u, v, &outRgbBuffer[3*(rgbIx2 + 1)]);
+      const int cb = rawU[uIx] - 128;
+      const int cr = rawV[vIx] - 128;
+      const int precomputedR = cr + (cr >> 2) + (cr >> 3) + (cr >> 5);
+      const int precomputedG = - ((cb >> 2) + (cb >> 4) + (cb >> 5)) - ((cr >> 1) + (cr >> 3) + (cr >> 4) + (cr >> 5));
+      const int precomputedB = cb + (cb >> 1) + (cb >> 2) + (cb >> 6);
+
+      yuvToRgb(y1, precomputedR, precomputedG, precomputedB, &outRgbBuffer[3*(rgbIx1)]);
+      yuvToRgb(y2, precomputedR, precomputedG, precomputedB, &outRgbBuffer[3*(rgbIx1 + 1)]);
+      yuvToRgb(y3, precomputedR, precomputedG, precomputedB, &outRgbBuffer[3*(rgbIx2)]);
+      yuvToRgb(y4, precomputedR, precomputedG, precomputedB, &outRgbBuffer[3*(rgbIx2 + 1)]);
       yIx1 += 2;
       yIx2 += 2;
       ++uIx;
