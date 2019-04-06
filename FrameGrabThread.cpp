@@ -1,5 +1,6 @@
 #include "FrameGrabThread.hpp"
 #include "Video.hpp"
+#include "ImageProcessing.hpp"
 extern "C"
 {
 #include <mjpegtools/jpegutils.h>
@@ -14,6 +15,7 @@ namespace
   unsigned char s_rawY[FRAME_SIZE];
   unsigned char s_rawU[UV_FRAME_SIZE];
   unsigned char s_rawV[UV_FRAME_SIZE];
+  unsigned char s_rgbBuffer[FRAME_SIZE * 3];
 }
 
 FrameGrabThread::FrameGrabThread(CameraContext cameraContext)
@@ -39,8 +41,9 @@ void FrameGrabThread::run()
                                           FRAME_HEIGHT,
                                           s_rawY,
                                           s_rawU,
-                                          s_rawV);
-    QImage image(s_rawY, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_Grayscale8);
+                                          s_rawV); // 420 format.
+    convertYuv420ToRgb888(s_rawY, s_rawU, s_rawV, FRAME_WIDTH, FRAME_HEIGHT, s_rgbBuffer);
+    QImage image(s_rgbBuffer, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB888);
     std::cout << "Decoded frame." << std::endl;
     emit signalNewFrame(image);
     std::cout << "Emitted signal." << std::endl;
