@@ -55,6 +55,7 @@ void FrameGrabThread::run()
 
     m_timerMovement.start();
     movementAddFrame(s_rawY);
+    movementErodeMask();
     movementVisualizeMask(s_rgbBuffer);
     m_timerMovement.stop();
 

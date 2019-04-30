@@ -1,5 +1,6 @@
 #include "ImageProcessing.hpp"
 #include "FrameSize.hpp"
+#include "Morphology.hpp"
 #include <algorithm>
 
 namespace
@@ -47,7 +48,36 @@ void movementAddFrame(unsigned char* frameGray)
   {
     s_movementBackgroundBuffer[i] = s_movementBackgroundBuffer[i] * oneMinusRatio + frameGray[i] * ratio;
     s_movementBuffer[i] = std::abs(static_cast<unsigned char>(s_movementBackgroundBuffer[i])
-                                   - frameGray[i]) > threshold;
+                                   - frameGray[i]) > threshold ? 1U : 0U;
+  }
+}
+
+void movementErodeMask()
+{
+  u8 outBuffer[FRAME_SIZE];
+  for (int i = 0; i < FRAME_SIZE; ++i)
+  {
+    outBuffer[i] = 0U;
+  }
+
+  MorphologyMask3x3 mask(1U);
+  const u8* row0 = &s_movementBuffer[0];
+  const u8* row1 = &s_movementBuffer[FRAME_WIDTH];
+  const u8* row2 = &s_movementBuffer[2 * FRAME_WIDTH];
+
+  for (int i = 1; i < FRAME_HEIGHT - 1; ++i)
+  {
+    for (int j = 1; j < FRAME_WIDTH - 1; ++j)
+    {
+      outBuffer[i * FRAME_WIDTH + j] = erode(mask, &row0[j-1], &row1[j-1], &row2[j-1]);
+    }
+    row0 += FRAME_WIDTH;
+    row1 += FRAME_WIDTH;
+    row2 += FRAME_WIDTH;
+  }
+  for (int i = 0; i < FRAME_SIZE; ++i)
+  {
+    s_movementBuffer[i] = outBuffer[i];
   }
 }
 
