@@ -42,7 +42,7 @@ void movementAddFrame(unsigned char* frameGray)
 
   const float ratio = 0.05F;
   const float oneMinusRatio = 1.0F - ratio;
-  const unsigned char threshold = 14U;
+  const unsigned char threshold = 17U;
   for (int i = 0; i < FRAME_SIZE; ++i)
   {
     s_movementBackgroundBuffer[i] = s_movementBackgroundBuffer[i] * oneMinusRatio + frameGray[i] * ratio;
@@ -57,9 +57,9 @@ void movementVisualizeMask(unsigned char* outRgbBuffer)
   {
     if (s_movementBuffer[i] == 0)
     {
-      outRgbBuffer[3*i] = 0;
-      outRgbBuffer[3*i + 1] = 0;
-      outRgbBuffer[3*i + 2] = 0;
+      outRgbBuffer[3*i] /= 2;
+      outRgbBuffer[3*i + 1] /= 2;
+      outRgbBuffer[3*i + 2] /= 2;
     }
   }
 }
