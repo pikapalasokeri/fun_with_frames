@@ -4,7 +4,8 @@
 
 Timer::Timer(const std::string& name)
   : m_name(name),
-    m_count(0)
+    m_count(0),
+    m_duration(0)
 {}
 
 Timer::~Timer()
@@ -29,5 +30,5 @@ void Timer::report() const
   std::cout << m_name << std::endl
             << "  " << m_duration.count() << " total us" << std::endl
             << "  " << m_count << " counts" << std::endl
-            << "  " << (m_duration.count() / m_count) << " avg us/count" << std::endl;
+            << "  " << (m_count > 0 ? (m_duration.count() / m_count) : 0) << " avg us/count" << std::endl;
 }
