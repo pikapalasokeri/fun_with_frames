@@ -21,6 +21,7 @@ private:
   Timer m_timerJpegDecode;
   Timer m_timerYuvRgb;
   Timer m_timerMovement;
+  Timer m_timerErode;
 };
 
 #endif

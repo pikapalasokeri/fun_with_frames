@@ -24,7 +24,8 @@ FrameGrabThread::FrameGrabThread(CameraContext cameraContext)
     m_keepGrabbing(true),
     m_timerJpegDecode("Jpeg decode"),
     m_timerYuvRgb("Yuv to rgb conversion"),
-    m_timerMovement("Movement")
+    m_timerMovement("Movement"),
+    m_timerErode("Erode")
 {
 }
 
@@ -55,7 +56,9 @@ void FrameGrabThread::run()
 
     m_timerMovement.start();
     movementAddFrame(s_rawY);
+    m_timerErode.start();
     movementErodeMask();
+    m_timerErode.stop();
     movementVisualizeMask(s_rgbBuffer);
     m_timerMovement.stop();
 

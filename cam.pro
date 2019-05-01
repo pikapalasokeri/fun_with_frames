@@ -8,7 +8,7 @@ INCLUDEPATH += "/usr/include/mjpegtools"
 QT += gui widgets
 LIBS += -lv4l2 -llavjpeg
 CONFIG += debug c++11
-QMAKE_CXXFLAGS += -O3
+QMAKE_CXXFLAGS += -O3 -mavx -msse -msse2 -msse3
 
 # Input
 SOURCES += cam2.cpp ImageViewer.cpp Video.cpp FrameGrabThread.cpp ImageProcessing.cpp Timer.cpp
