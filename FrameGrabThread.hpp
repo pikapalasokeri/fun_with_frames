@@ -22,6 +22,7 @@ private:
   Timer m_timerYuvRgb;
   Timer m_timerMovement;
   Timer m_timerErode;
+  Timer m_timerVisualize;
 };
 
 #endif

@@ -25,7 +25,8 @@ FrameGrabThread::FrameGrabThread(CameraContext cameraContext)
     m_timerJpegDecode("Jpeg decode"),
     m_timerYuvRgb("Yuv to rgb conversion"),
     m_timerMovement("Movement"),
-    m_timerErode("Erode")
+    m_timerErode("Erode"),
+    m_timerVisualize("Visualize")
 {
 }
 
@@ -56,11 +57,15 @@ void FrameGrabThread::run()
 
     m_timerMovement.start();
     movementAddFrame(s_rawY);
+    m_timerMovement.stop();
+
     m_timerErode.start();
     movementErodeMask();
     m_timerErode.stop();
+
+    m_timerVisualize.start();
     movementVisualizeMask(s_rgbBuffer);
-    m_timerMovement.stop();
+    m_timerVisualize.stop();
 
     QImage image(s_rgbBuffer, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB888);
     std::cout << "Decoded frame." << std::endl;
